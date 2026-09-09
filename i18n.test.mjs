@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {translate,localize,translations} from './lib/i18n.ts';
+import {statuses} from './lib/demo.ts';
+for(const s of statuses)assert(translations[s],`Missing status: ${s}`);
+assert.equal(translate('Calendar','bg'),'Календар');
+assert.equal(translate('Calendar','en'),'Calendar');
+assert.equal(translate('Appointment confirmed','bg'),'Записан час: потвърден');
+assert.equal(translate('2026-09-11','bg'),'11.09.2026');
+const option=localize(createElement('option',null,'Confirmed'),'bg');assert.equal(option.props.value,'Confirmed');
+assert.equal(renderToStaticMarkup(option),'<option value="Confirmed">Потвърден</option>');
+const input=localize(createElement('input',{value:'Room 1',readOnly:true,placeholder:'Full name'}),'bg');assert.equal(input.props.value,'Room 1');assert.equal(input.props.placeholder,'Име и фамилия');
+assert.equal(translate('Patient entered custom text','bg'),'Patient entered custom text');
+console.log('Localization checks passed: statuses, BG/EN, dates, notifications, stable select/input values.');
