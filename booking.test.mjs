@@ -8,3 +8,5 @@ assert.equal(conflict([a],{...a,id:'new',time:'10:00'}),false,'Back-to-back book
 assert.equal(conflict(s.appointments,a),false,'Existing appointment does not conflict with itself');
 console.log('5 booking conflict checks passed');
 
+assert.equal(conflict([a],{...a,id:'other-patient-slot',doctor:'alex',room:'Room 2'}),true,'Patient overlap blocked even with another doctor and room');
+assert.equal(conflict([a],{...a,id:'different-patient',patient:'unrelated',doctor:'alex',room:'Room 2'}),false,'Independent resources may overlap');
