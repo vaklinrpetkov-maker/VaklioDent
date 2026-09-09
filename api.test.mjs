@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+const url='http://localhost:3001/api/demo';
+assert.equal((await fetch(url)).status,401);
+let r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'login',email:'demo@example.com',password:'Friday2026!'})});assert.equal(r.status,200,await r.clone().text());const cookie=r.headers.get('set-cookie').split(';')[0];
+const headers={'Content-Type':'application/json',cookie};
+r=await fetch(url,{headers});let data=await r.json();assert.equal(r.status,200,JSON.stringify(data));assert.equal(data.state.patients.length,12);
+let appointment={...data.state.appointments[0],id:'api-test-conflict'};
+r=await fetch(url,{method:'POST',headers,body:JSON.stringify({action:'appointment',appointment,version:data.version})});assert.equal(r.status,409);
+appointment={...appointment,id:'api-test-save',date:'2026-12-18',time:'16:00',status:'Confirmed'};
+r=await fetch(url,{method:'POST',headers,body:JSON.stringify({action:'appointment',appointment,version:data.version})});assert.equal(r.status,200,await r.clone().text());let updated=await r.json();
+r=await fetch(url,{headers});const saved=await r.json();assert(saved.state.appointments.some(a=>a.id==='api-test-save'));assert(saved.state.notifications.length>data.state.notifications.length);
+r=await fetch(url,{method:'POST',headers,body:JSON.stringify({action:'read',version:data.version})});assert.equal(r.status,409);
+r=await fetch(url,{method:'POST',headers,body:JSON.stringify({action:'logout'})});assert.equal(r.status,200);assert.equal((await fetch(url,{headers})).status,401);
+console.log('API checks passed: login, authorization, persistence, conflict, notifications, stale update, logout.');
